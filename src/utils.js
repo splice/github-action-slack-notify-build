@@ -42,11 +42,11 @@ function buildSlackAttachments({ status, color, github, buildId }) {
           short: true,
         },
         referenceLink,
-        {
-          title: 'Event',
-          value: event,
-          short: true,
-        },
+        // {
+        //   title: 'Event',
+        //   value: event,
+        //   short: true,
+        // },
         {
           title: 'Build ID',
           value: buildId,

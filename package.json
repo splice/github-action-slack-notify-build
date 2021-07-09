@@ -5,6 +5,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "ncc build index.js",
+    "watch": "ncc build --watch index.js",
     "test": "jest"
   },
   "dependencies": {
