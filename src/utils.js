@@ -1,7 +1,7 @@
 const { context } = require('@actions/github');
 
-function buildSlackAttachments({ status, color, github }) {
-  const { payload, ref, workflow, eventName, buildId } = github.context;
+function buildSlackAttachments({ status, color, github, buildId }) {
+  const { payload, ref, workflow, eventName } = github.context;
   const { owner, repo } = context.repo;
   const event = eventName;
   const branch = event === 'pull_request' ? payload.pull_request.head.ref : ref.replace('refs/heads/', '');
