@@ -1104,6 +1104,8 @@ exports.issueCommand = issueCommand;
 /***/ 104:
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
+// @ts-check
+
 const core = __webpack_require__(470);
 const github = __webpack_require__(469);
 const { WebClient } = __webpack_require__(114);
@@ -1119,7 +1121,7 @@ const { buildSlackAttachments, formatChannelName } = __webpack_require__(543);
     const token = process.env.SLACK_BOT_TOKEN;
     const slack = new WebClient(token);
 
-    core.debug(`got this for build ID: ${buildID}`);
+    core.debug(`got this for build ID: ${buildId}`);
 
     if (!channel && !core.getInput('channel_id')) {
       core.setFailed(`You must provider either a 'channel' or a 'channel_id'.`);
@@ -1147,6 +1149,7 @@ const { buildSlackAttachments, formatChannelName } = __webpack_require__(543);
       args.ts = messageId;
     }
 
+    // @ts-ignore
     const response = await slack.chat[apiMethod](args);
 
     core.setOutput('message_id', response.ts);
