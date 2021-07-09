@@ -10435,7 +10435,6 @@ function buildSlackAttachments({ status, color, github, buildId }) {
         {
           title: 'Build ID',
           value: buildId,
-          short: true,
         },
       ],
       footer_icon: 'https://github.githubassets.com/favicon.ico',
