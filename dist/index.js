@@ -1118,18 +1118,30 @@ const { buildSlackAttachments, formatChannelName } = __webpack_require__(543);
     const color = core.getInput('color');
     const messageId = core.getInput('message_id');
     const buildId = core.getInput('build_id');
+    const linkText = core.getInput('link_text');
+    const linkUrl = core.getInput('link_url');
     const token = process.env.SLACK_BOT_TOKEN;
     const slack = new WebClient(token);
 
-    core.debug(`got this for build ID: ${buildId}`);
+    core.debug(`buildId: ${buildId}`);
+    core.debug(`linkText: ${linkText}`);
+    core.debug(`linkUrl: ${linkUrl}`);
 
     if (!channel && !core.getInput('channel_id')) {
       core.setFailed(`You must provider either a 'channel' or a 'channel_id'.`);
       return;
     }
 
-    const attachments = buildSlackAttachments({ status, color, github, buildId });
-    const channelId = core.getInput('channel_id') || (await lookUpChannelId({ slack, channel }));
+    const attachments = buildSlackAttachments({
+      status,
+      color,
+      github,
+      buildId,
+      linkText,
+      linkUrl,
+    });
+    const channelId =
+      core.getInput('channel_id') || (await lookUpChannelId({ slack, channel }));
 
     core.debug(`got these attachments: ${JSON.stringify(attachments, null, 2)}`);
 
@@ -1164,7 +1176,9 @@ async function lookUpChannelId({ slack, channel }) {
 
   // Async iteration is similar to a simple for loop.
   // Use only the first two parameters to get an async iterator.
-  for await (const page of slack.paginate('conversations.list', { types: 'public_channel, private_channel' })) {
+  for await (const page of slack.paginate('conversations.list', {
+    types: 'public_channel, private_channel',
+  })) {
     // You can inspect each page, find your result, and stop the loop with a `break` statement
     const match = page.channels.find(c => c.name === formattedChannel);
     if (match) {
@@ -10385,13 +10399,17 @@ function hasFirstPage (link) {
 
 const { context } = __webpack_require__(469);
 
-function buildSlackAttachments({ status, color, github, buildId }) {
+function buildSlackAttachments({ status, color, github, buildId, linkText, linkUrl }) {
   const { payload, ref, workflow, eventName } = github.context;
   const { owner, repo } = context.repo;
   const event = eventName;
-  const branch = event === 'pull_request' ? payload.pull_request.head.ref : ref.replace('refs/heads/', '');
+  const branch =
+    event === 'pull_request'
+      ? payload.pull_request.head.ref
+      : ref.replace('refs/heads/', '');
 
-  const sha = event === 'pull_request' ? payload.pull_request.head.sha : github.context.sha;
+  const sha =
+    event === 'pull_request' ? payload.pull_request.head.sha : github.context.sha;
   const runId = parseInt(process.env.GITHUB_RUN_ID, 10);
 
   const referenceLink =
@@ -10407,36 +10425,51 @@ function buildSlackAttachments({ status, color, github, buildId }) {
           short: true,
         };
 
+  const repoField = {
+    title: 'Repo',
+    value: `<https://github.com/${owner}/${repo} | ${owner}/${repo}>`,
+    short: true,
+  };
+
+  const workflowField = {
+    title: 'Workflow',
+    value: `<https://github.com/${owner}/${repo}/actions/runs/${runId} | ${workflow}>`,
+    short: true,
+  };
+
+  const statusField = {
+    title: 'Status',
+    value: status,
+    short: true,
+  };
+
+  const buildIdField = Boolean(buildId)
+    ? {
+        title: 'Build ID',
+        value: '`' + buildId + '`',
+      }
+    : null;
+
+  const linkField = Boolean(linkUrl)
+    ? {
+        title: 'More Info',
+        value: linkText ? `<${linkUrl} | ${linkText}>` : linkUrl,
+      }
+    : null;
+
+  const fields = [
+    repoField,
+    workflowField,
+    statusField,
+    referenceLink,
+    buildIdField,
+    linkField,
+  ].filter(Boolean);
+
   return [
     {
       color,
-      fields: [
-        {
-          title: 'Repo',
-          value: `<https://github.com/${owner}/${repo} | ${owner}/${repo}>`,
-          short: true,
-        },
-        {
-          title: 'Workflow',
-          value: `<https://github.com/${owner}/${repo}/actions/runs/${runId} | ${workflow}>`,
-          short: true,
-        },
-        {
-          title: 'Status',
-          value: status,
-          short: true,
-        },
-        referenceLink,
-        // {
-        //   title: 'Event',
-        //   value: event,
-        //   short: true,
-        // },
-        {
-          title: 'Build ID',
-          value: '`' + buildId + '`',
-        },
-      ],
+      fields: fields,
       footer_icon: 'https://github.githubassets.com/favicon.ico',
       footer: `<https://github.com/${owner}/${repo} | ${owner}/${repo}>`,
       ts: Math.floor(Date.now() / 1000),
