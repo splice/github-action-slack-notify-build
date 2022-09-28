@@ -44,14 +44,14 @@ function buildSlackAttachments({ status, color, github, buildId, linkText, linkU
     short: true,
   };
 
-  const buildIdField = buildId
+  const buildIdField = Boolean(buildId)
     ? {
         title: 'Build ID',
         value: '`' + buildId + '`',
       }
     : null;
 
-  const linkField = linkUrl
+  const linkField = Boolean(linkUrl)
     ? {
         title: 'More Info',
         value: linkText ? `<${linkUrl} | ${linkText}>` : linkUrl,

@@ -17,7 +17,9 @@ const { buildSlackAttachments, formatChannelName } = require('./src/utils');
     const token = process.env.SLACK_BOT_TOKEN;
     const slack = new WebClient(token);
 
-    core.debug(`got this for build ID: ${buildId}`);
+    core.debug(`buildId: ${buildId}`);
+    core.debug(`linkText: ${linkText}`);
+    core.debug(`linkUrl: ${linkUrl}`);
 
     if (!channel && !core.getInput('channel_id')) {
       core.setFailed(`You must provider either a 'channel' or a 'channel_id'.`);
