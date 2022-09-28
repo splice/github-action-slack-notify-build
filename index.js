@@ -12,6 +12,8 @@ const { buildSlackAttachments, formatChannelName } = require('./src/utils');
     const color = core.getInput('color');
     const messageId = core.getInput('message_id');
     const buildId = core.getInput('build_id');
+    const linkText = core.getInput('link_text');
+    const linkUrl = core.getInput('link_url');
     const token = process.env.SLACK_BOT_TOKEN;
     const slack = new WebClient(token);
 
@@ -22,8 +24,16 @@ const { buildSlackAttachments, formatChannelName } = require('./src/utils');
       return;
     }
 
-    const attachments = buildSlackAttachments({ status, color, github, buildId });
-    const channelId = core.getInput('channel_id') || (await lookUpChannelId({ slack, channel }));
+    const attachments = buildSlackAttachments({
+      status,
+      color,
+      github,
+      buildId,
+      linkText,
+      linkUrl,
+    });
+    const channelId =
+      core.getInput('channel_id') || (await lookUpChannelId({ slack, channel }));
 
     core.debug(`got these attachments: ${JSON.stringify(attachments, null, 2)}`);
 
@@ -58,7 +68,9 @@ async function lookUpChannelId({ slack, channel }) {
 
   // Async iteration is similar to a simple for loop.
   // Use only the first two parameters to get an async iterator.
-  for await (const page of slack.paginate('conversations.list', { types: 'public_channel, private_channel' })) {
+  for await (const page of slack.paginate('conversations.list', {
+    types: 'public_channel, private_channel',
+  })) {
     // You can inspect each page, find your result, and stop the loop with a `break` statement
     const match = page.channels.find(c => c.name === formattedChannel);
     if (match) {
