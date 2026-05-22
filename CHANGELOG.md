@@ -1,3 +1,9 @@
+# v2.0.0
+
+### Changed
+
+-  Updates the action to use Node 24, in anticipation of the GHA plaform deprecation of Node 20 runners: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+
 # [1.6.0](https://github.com/voxmedia/github-action-slack-notify-build/compare/v1.5.0...v1.6.0) (2023-01-03)
 
 
